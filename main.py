@@ -1801,6 +1801,10 @@ async def update_books_command(message: types.Message):
                 new_db = {}
                 total = 0
                 session_path = os.path.join(BASE_DIR, "update_session")
+                tg_session = os.getenv("TG_SESSION")
+                if tg_session:
+                    from telethon.sessions import StringSession
+                    session_path = StringSession(tg_session)
                 async with TelegramClient(session_path, API_ID, API_HASH) as client:
                     async for msg in client.iter_messages(CHANNEL, limit=5000):
                         if not (msg.media and isinstance(msg.media, MessageMediaDocument)):
@@ -2037,6 +2041,25 @@ async def search(message: types.Message):
     )
 
 # =========================
+# WEB-СЕРВЕР для Render / UptimeRobot
+# =========================
+async def start_web_server():
+    from aiohttp import web
+
+    async def health(request):
+        return web.Response(text="OK")
+
+    app = web.Application()
+    app.router.add_get("/", health)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.getenv("PORT", 10000))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    logger.info(f"🌐 Web server started on port {port}")
+
+
+# =========================
 # MAIN
 # =========================
 async def main():
@@ -2067,6 +2090,7 @@ async def main():
         BotCommand(command="banlist",      description="📋 Список банов"),
     ], scope=BotCommandScopeChat(chat_id=ADMIN_ID))
 
+    await start_web_server()
     logger.info("✅ Бот запущен!")
     await dp.start_polling(bot)
 
