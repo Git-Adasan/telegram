@@ -1959,38 +1959,6 @@ async def search(message: types.Message):
         return
     # =============================
 
-    # =============================
-    # АВТОБАН ЗА МАТЫ
-    # =============================
-    text_lower = text.lower()
-    for mat in MAT_WORDS:
-        if mat in text_lower:
-            ban_user(message.from_user.id, f"Автобан: мат ({mat})")
-            spam_tracker.pop(message.from_user.id, None)
-            await message.answer(
-                "🚫 Сіз бұғатталдыңыз / Вы заблокированы за нецензурную лексику.\n\n"
-                "Егер қате болса:\n"
-                "Если это ошибка, обратитесь:\n\n"
-                "👉 @Tg_Adasan"
-            )
-            try:
-                await bot.send_message(
-                    ADMIN_ID,
-                    f"⚠️ Автобан за мат!\n\n"
-                    f"👤 {message.from_user.first_name}\n"
-                    f"🆔 ID: {message.from_user.id}\n"
-                    f"@{message.from_user.username or 'нет username'}\n\n"
-                    f"💬 Написал: {text[:100]}\n"
-                    f"📝 Мат: {mat}",
-                    reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                        [InlineKeyboardButton(text="🔓 Разбанить", callback_data=f"unban_{message.from_user.id}")]
-                    ])
-                )
-            except Exception:
-                pass
-            return
-    # =============================
-
     # 1. Ищем предмет
     subject_code = find_subject(text)
     if subject_code:
